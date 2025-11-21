@@ -71,9 +71,12 @@ body.dark-mode .btn-primary { color: #111827; }
     margin-bottom: 2rem;
 }
 .header-content { display: flex; justify-content: space-between; align-items: center; }
+.header-actions { display: flex; gap: 8px; align-items: center; }
 h1 { font-size: 1.5rem; color: var(--dark-text); }
 .highlight { color: var(--accent-cyan); }
-.icon-btn { background: none; border: none; cursor: pointer; color: var(--dark-text); padding: 5px; }
+.icon-btn { background: none; border: none; cursor: pointer; color: var(--dark-text); padding: 5px; transition: opacity 0.2s, transform 0.2s; }
+.icon-btn:hover { opacity: 0.7; transform: scale(1.1); }
+.icon-btn svg { width: 24px; height: 24px; }
 .moon-icon, .sun-icon { width: 24px; height: 24px; }
 
 /* Cards */
@@ -122,9 +125,10 @@ h1 { font-size: 1.5rem; color: var(--dark-text); }
     border: 2px solid transparent;
     user-select: none;
     transition: all 0.2s ease;
+    position: relative;
 }
 .checkbox-label span:first-child { font-size: 1.2rem; margin-bottom: 2px; } /* The Kana */
-.checkbox-label span:last-child { font-size: 0.75rem; opacity: 0.8; text-transform: uppercase; } /* The Group Name */
+.checkbox-label span:nth-child(2) { font-size: 0.75rem; opacity: 0.8; text-transform: uppercase; } /* The Group Name */
 .checkbox-label input { display: none; }
 
 .checkbox-label.checked {
@@ -132,7 +136,52 @@ h1 { font-size: 1.5rem; color: var(--dark-text); }
     border-color: var(--accent-cyan);
     color: var(--accent-cyan);
 }
-.checkbox-label:hover { transform: translateY(-2px); }
+.checkbox-label:hover { 
+    transform: translateY(-2px); 
+}
+.checkbox-label:hover .tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(-5px);
+}
+.checkbox-label .tooltip {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-10px);
+    background-color: var(--dark-text);
+    color: var(--white);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 1rem;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+    z-index: 1000;
+    margin-bottom: 8px;
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+}
+body.dark-mode .checkbox-label .tooltip {
+    background-color: var(--card-bg);
+    color: var(--dark-text);
+    border: 1px solid var(--soft-gray);
+}
+.checkbox-label .tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: var(--dark-text);
+}
+body.dark-mode .checkbox-label .tooltip::after {
+    border-top-color: var(--card-bg);
+}
 
 .action-area { text-align: center; margin-top: 2rem; display: flex; justify-content: center; gap: 1rem; }
 
@@ -218,7 +267,137 @@ h1 { font-size: 1.5rem; color: var(--dark-text); }
 .fade-in { animation: fadeIn 0.4s ease-in-out; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
+/* BOT HELPER */
+.bot-helper {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 2000;
+    max-width: 350px;
+    display: flex;
+    gap: 12px;
+    animation: botSlideIn 0.4s ease-out;
+}
+@keyframes botSlideIn {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+.bot-avatar {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, var(--accent-cyan), var(--primary-blue));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+.bot-avatar svg {
+    width: 28px;
+    height: 28px;
+}
+.bot-message {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    flex: 1;
+    border: 2px solid var(--accent-cyan);
+}
+.bot-header {
+    background: var(--accent-cyan);
+    color: white;
+    padding: 10px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.bot-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+.bot-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+.bot-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+.bot-content {
+    padding: 16px;
+}
+.bot-content p {
+    margin: 0 0 16px 0;
+    line-height: 1.6;
+    color: var(--dark-text);
+}
+.bot-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+.bot-btn {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+}
+.bot-skip {
+    margin-left: auto;
+    font-size: 0.85rem;
+    padding: 4px 8px;
+}
+.bot-highlight {
+    position: fixed;
+    pointer-events: none;
+    border: 3px solid var(--accent-cyan);
+    border-radius: 8px;
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+    z-index: 1999;
+    transition: all 0.3s ease;
+    opacity: 0;
+}
+body.dark-mode .bot-highlight {
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.7);
+}
+.bot-highlight.active {
+    opacity: 1;
+}
+
 @media (max-width: 600px) {
     .grid-columns { grid-template-columns: 1fr; gap: 2rem; }
     .kana-display { font-size: 4rem; }
+    .bot-helper {
+        bottom: 10px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
+    }
+    .bot-avatar {
+        width: 40px;
+        height: 40px;
+    }
+    .bot-avatar svg {
+        width: 22px;
+        height: 22px;
+    }
 }

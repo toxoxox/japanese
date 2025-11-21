@@ -14,10 +14,15 @@
     <header class="main-header">
         <div class="container header-content">
             <h1>Kana<span class="highlight">Master</span></h1>
-            <button id="theme-toggle" class="icon-btn" aria-label="Toggle Dark Mode">
-                <svg class="sun-icon hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                <svg class="moon-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
-            </button>
+            <div class="header-actions">
+                <button id="restart-tutorial" class="icon-btn" aria-label="Restart Tutorial" title="Restart Tutorial">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                </button>
+                <button id="theme-toggle" class="icon-btn" aria-label="Toggle Dark Mode">
+                    <svg class="sun-icon hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    <svg class="moon-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                </button>
+            </div>
         </div>
     </header>
 
@@ -118,6 +123,38 @@
             <p>2. You can mix Hiragana and Katakana.</p>
             <p>3. Press <strong>Start Quiz</strong> and type the Romanized reading (Romaji).</p>
             <button id="close-tutorial" class="btn-primary">Got it!</button>
+        </div>
+    </div>
+
+    <div id="popup-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3 id="popup-title">Notice</h3>
+            <p id="popup-message"></p>
+            <button id="popup-close" class="btn-primary">OK</button>
+        </div>
+    </div>
+
+    <!-- Bot Helper -->
+    <div class="bot-highlight"></div>
+    <div id="bot-helper" class="bot-helper hidden">
+        <div class="bot-avatar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+            </svg>
+        </div>
+        <div class="bot-message">
+            <div class="bot-header">
+                <span class="bot-name">KanaBot</span>
+                <button id="bot-close" class="bot-close" aria-label="Close">×</button>
+            </div>
+            <div class="bot-content">
+                <p id="bot-text"></p>
+                <div class="bot-actions">
+                    <button id="bot-prev" class="btn-secondary bot-btn">← Previous</button>
+                    <button id="bot-next" class="btn-primary bot-btn">Next →</button>
+                    <button id="bot-skip" class="text-btn bot-skip">Skip Tour</button>
+                </div>
+            </div>
         </div>
     </div>
 
