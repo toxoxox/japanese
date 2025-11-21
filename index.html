@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KanaMaster | Professional Japanese Practice</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <header class="main-header">
+        <div class="container header-content">
+            <h1>Kana<span class="highlight">Master</span></h1>
+            <button id="theme-toggle" class="icon-btn" aria-label="Toggle Dark Mode">
+                <svg class="sun-icon hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                <svg class="moon-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+            </button>
+        </div>
+    </header>
+
+    <main class="container">
+        
+        <section id="view-selection" class="card fade-in">
+            <div class="card-header">
+                <h2>Configure Your Quiz</h2>
+                <p>Select the rows you wish to practice.</p>
+            </div>
+            
+            <div class="grid-columns">
+                <div class="script-group">
+                    <div class="group-header">
+                        <h3>Hiragana</h3>
+                        <div class="group-actions">
+                            <button class="text-btn" id="select-all-h">All</button>
+                            <button class="text-btn" id="clear-all-h">None</button>
+                        </div>
+                    </div>
+                    <div class="checkbox-grid" id="hiragana-options"></div>
+                </div>
+
+                <div class="script-group">
+                    <div class="group-header">
+                        <h3>Katakana</h3>
+                        <div class="group-actions">
+                            <button class="text-btn" id="select-all-k">All</button>
+                            <button class="text-btn" id="clear-all-k">None</button>
+                        </div>
+                    </div>
+                    <div class="checkbox-grid" id="katakana-options"></div>
+                </div>
+            </div>
+
+            <div class="action-area">
+                <button id="start-btn" class="btn-primary">Start Quiz</button>
+            </div>
+        </section>
+
+        <section id="view-quiz" class="card fade-in hidden">
+            <div class="quiz-header">
+                <div class="progress-container">
+                    <div id="progress-bar" class="progress-bar"></div>
+                </div>
+                <span id="counter-text">1 / 10</span>
+            </div>
+
+            <div class="quiz-content">
+                <div id="question-char" class="kana-display">あ</div>
+                
+                <div class="input-area">
+                    <input type="text" id="answer-input" placeholder="Type romaji..." autocomplete="off">
+                    <button id="submit-answer" class="btn-primary">Check</button>
+                </div>
+                
+                <div id="feedback-msg" class="feedback"></div>
+            </div>
+        </section>
+
+        <section id="view-results" class="card fade-in hidden">
+            <div class="results-header">
+                <h2>Quiz Complete!</h2>
+                <div class="score-badge">
+                    <span id="final-score">90%</span>
+                    <span class="score-label">Accuracy</span>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-val" id="total-count">0</span>
+                    <span class="stat-label">Total Items</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-val error-color" id="mistake-count">0</span>
+                    <span class="stat-label">Mistakes</span>
+                </div>
+            </div>
+
+            <div id="mistakes-container" class="mistakes-list hidden">
+                <h3>Review Mistakes</h3>
+                <ul id="mistakes-ul"></ul>
+            </div>
+
+            <div class="action-area result-actions">
+                <button id="retry-mistakes-btn" class="btn-secondary hidden">Retry Mistakes</button>
+                <button id="home-btn" class="btn-primary">Back to Home</button>
+            </div>
+        </section>
+
+    </main>
+
+    <div id="tutorial-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Welcome to KanaMaster</h3>
+            <p>1. Select the <strong>rows</strong> (e.g., A, Ka, Sa) you want to study.</p>
+            <p>2. You can mix Hiragana and Katakana.</p>
+            <p>3. Press <strong>Start Quiz</strong> and type the Romanized reading (Romaji).</p>
+            <button id="close-tutorial" class="btn-primary">Got it!</button>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
