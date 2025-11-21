@@ -1,9 +1,11 @@
 /**
  * script.js
  * Handles application logic, UI rendering, quiz flow, and storage.
+ * This code is written in a simple, student-friendly style for easy learning.
  */
 
 // --- DOM Elements ---
+// Store references to all HTML elements we need to work with
 const views = {
     selection: document.getElementById('view-selection'),
     quiz: document.getElementById('view-quiz'),
@@ -46,13 +48,16 @@ const elements = {
     botHighlight: document.querySelector('.bot-highlight')
 };
 
-// --- State ---
-let quizPool = [];
-let currentIndex = 0;
-let score = 0;
-let mistakes = []; // Array of objects { char, romaji (array), userAnswer }
-let isRetry = false;
-let botStep = 0;
+// --- State Variables ---
+// These variables keep track of the quiz state
+let quizPool = [];           // Array of all kana to quiz on
+let currentIndex = 0;        // Which question we're currently on
+let score = 0;               // How many questions answered correctly
+let mistakes = [];           // Array of kana that were answered incorrectly
+let isRetry = false;         // Whether we're retrying mistakes
+let botStep = 0;             // Current step in the bot tutorial
+
+// Tutorial steps for the bot helper
 const botSteps = [
     {
         message: "  Hi! I'm KanaBot, your learning assistant. Welcome to KanaMaster!",
@@ -86,7 +91,8 @@ const botSteps = [
 ]; 
 
 // --- Initialization ---
-document.addEventListener('DOMContentLoaded', () => {
+// When the page loads, set everything up
+document.addEventListener('DOMContentLoaded', function() {
     renderSelectionUI();
     loadSettings();
     setupEventListeners();
@@ -94,227 +100,448 @@ document.addEventListener('DOMContentLoaded', () => {
     checkBotHelper();
 });
 
-// --- UI Rendering ---
+// --- UI Rendering Functions ---
 
-// Generates checkboxes based on the keys in KANA_DATA (a, ka, sa, etc.)
-function renderSelectionUI() {
-    const createCheckbox = (key, scriptName, container, firstChar, romajiList) => {
-        const labelEl = document.createElement('label');
-        labelEl.className = 'checkbox-label';
-        labelEl.setAttribute('data-tooltip', romajiList.join(' '));
-        
-        // We display the first char of that row (e.g., "あ" for 'a' row) and the row name
-        labelEl.innerHTML = `
-            <span>${firstChar}</span>
-            <span>${key.toUpperCase()}</span>
-            <input type="checkbox" data-group="${key}" data-script="${scriptName}">
-            <span class="tooltip">${romajiList.join(' ')}</span>
-        `;
-        
-        // Add click styling logic
-        const input = labelEl.querySelector('input');
-        input.addEventListener('change', () => {
-            if (input.checked) labelEl.classList.add('checked');
-            else labelEl.classList.remove('checked');
-            saveSelections();
-        });
-        
-        container.appendChild(labelEl);
-    };
-
-    // Render Hiragana Rows
-    Object.keys(KANA_DATA.hiragana).forEach(key => {
-        // Get the first character of the group for visual reference (e.g., 'あ' for 'a' row)
-        const displayChar = KANA_DATA.hiragana[key][0].char;
-        // Get all romaji values in this row for tooltip (use first romaji from each item)
-        const romajiList = KANA_DATA.hiragana[key].map(item => item.romaji[0]);
-        createCheckbox(key, 'hiragana', elements.hiraganaGrid, displayChar, romajiList);
+/**
+ * Creates a checkbox button for one row (like "A" or "KA")
+ * @param {string} key - The row name like "a" or "ka"
+ * @param {string} scriptName - Either "hiragana" or "katakana"
+ * @param {HTMLElement} container - Where to put the checkbox
+ * @param {string} firstChar - The first kana character in this row
+ * @param {Array} romajiList - Array of romaji strings for the tooltip
+ */
+function createCheckbox(key, scriptName, container, firstChar, romajiList) {
+    // Create a label element to hold our checkbox
+    const labelEl = document.createElement('label');
+    labelEl.className = 'checkbox-label';
+    
+    // Join the romaji list with spaces for the tooltip
+    const tooltipText = romajiList.join(' ');
+    labelEl.setAttribute('data-tooltip', tooltipText);
+    
+    // Make the key uppercase for display (a becomes A)
+    const uppercaseKey = key.toUpperCase();
+    
+    // Create the HTML content for this checkbox
+    labelEl.innerHTML = '<span>' + firstChar + '</span>' +
+                        '<span>' + uppercaseKey + '</span>' +
+                        '<input type="checkbox" data-group="' + key + '" data-script="' + scriptName + '">' +
+                        '<span class="tooltip">' + tooltipText + '</span>';
+    
+    // Find the input checkbox we just created
+    const input = labelEl.querySelector('input');
+    
+    // When checkbox is clicked, update the styling
+    input.addEventListener('change', function() {
+        if (input.checked) {
+            labelEl.classList.add('checked');
+        } else {
+            labelEl.classList.remove('checked');
+        }
+        saveSelections();
     });
-
-    // Render Katakana Rows
-    Object.keys(KANA_DATA.katakana).forEach(key => {
-        const displayChar = KANA_DATA.katakana[key][0].char;
-        // Get all romaji values in this row for tooltip (use first romaji from each item)
-        const romajiList = KANA_DATA.katakana[key].map(item => item.romaji[0]);
-        createCheckbox(key, 'katakana', elements.katakanaGrid, displayChar, romajiList);
-    });
+    
+    // Add this checkbox to the container
+    container.appendChild(labelEl);
 }
 
-// --- Quiz Logic ---
+/**
+ * Gets the first romaji from a kana item
+ * @param {Object} item - A kana object with a romaji array
+ * @returns {string} The first romaji string
+ */
+function getFirstRomaji(item) {
+    return item.romaji[0];
+}
 
+/**
+ * Gets the romaji list for all items in a row
+ * @param {Array} rowData - Array of kana items in a row
+ * @returns {Array} Array of romaji strings
+ */
+function getRomajiList(rowData) {
+    const romajiList = [];
+    for (let i = 0; i < rowData.length; i++) {
+        const firstRomaji = getFirstRomaji(rowData[i]);
+        romajiList.push(firstRomaji);
+    }
+    return romajiList;
+}
+
+/**
+ * Creates all the checkbox buttons for Hiragana and Katakana
+ */
+function renderSelectionUI() {
+    // Get all the keys from the hiragana data (like "a", "ka", "sa", etc.)
+    const hiraganaKeys = Object.keys(KANA_DATA.hiragana);
+    
+    // Loop through each hiragana row
+    for (let i = 0; i < hiraganaKeys.length; i++) {
+        const key = hiraganaKeys[i];
+        const rowData = KANA_DATA.hiragana[key];
+        
+        // Get the first character to display (like 'あ' for 'a' row)
+        const displayChar = rowData[0].char;
+        
+        // Get all romaji for the tooltip
+        const romajiList = getRomajiList(rowData);
+        
+        // Create the checkbox for this row
+        createCheckbox(key, 'hiragana', elements.hiraganaGrid, displayChar, romajiList);
+    }
+
+    // Get all the keys from the katakana data
+    const katakanaKeys = Object.keys(KANA_DATA.katakana);
+    
+    // Loop through each katakana row
+    for (let i = 0; i < katakanaKeys.length; i++) {
+        const key = katakanaKeys[i];
+        const rowData = KANA_DATA.katakana[key];
+        
+        // Get the first character to display
+        const displayChar = rowData[0].char;
+        
+        // Get all romaji for the tooltip
+        const romajiList = getRomajiList(rowData);
+        
+        // Create the checkbox for this row
+        createCheckbox(key, 'katakana', elements.katakanaGrid, displayChar, romajiList);
+    }
+}
+
+// --- Quiz Logic Functions ---
+
+/**
+ * Collects all the kana from checked checkboxes into one array
+ * @returns {Array} Array of kana objects to quiz on
+ */
 function collectSelections() {
+    // Find all checkboxes that are checked
     const checked = document.querySelectorAll('input[type="checkbox"]:checked');
-    let pool = [];
+    const pool = [];
 
-    checked.forEach(cb => {
-        const script = cb.dataset.script;
-        const group = cb.dataset.group;
+    // Loop through each checked checkbox
+    for (let i = 0; i < checked.length; i++) {
+        const cb = checked[i];
+        const script = cb.dataset.script;  // "hiragana" or "katakana"
+        const group = cb.dataset.group;    // "a", "ka", etc.
+        
+        // Get all kana items for this row
         const items = KANA_DATA[script][group];
-        // Add script info to item for internal tracking if needed
-        pool = pool.concat(items.map(item => ({...item, script})));
-    });
+        
+        // Add each item to the pool, along with the script info
+        for (let j = 0; j < items.length; j++) {
+            const item = items[j];
+            const itemWithScript = {
+                char: item.char,
+                romaji: item.romaji,
+                script: script
+            };
+            pool.push(itemWithScript);
+        }
+    }
 
     return pool;
 }
 
-// Fisher-Yates Shuffle
+/**
+ * Randomly shuffles an array to mix up the quiz order
+ * Uses the Fisher-Yates shuffle algorithm
+ * @param {Array} array - The array to shuffle
+ * @returns {Array} The shuffled array
+ */
 function shuffle(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
+    // Create a copy of the array so we don't modify the original
+    const shuffledArray = [];
+    for (let i = 0; i < array.length; i++) {
+        shuffledArray.push(array[i]);
     }
-    return array;
+    
+    // Shuffle by swapping random elements
+    for (let i = shuffledArray.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        
+        // Swap elements at positions i and j
+        const temp = shuffledArray[i];
+        shuffledArray[i] = shuffledArray[j];
+        shuffledArray[j] = temp;
+    }
+    
+    return shuffledArray;
 }
 
-function startQuiz(customPool = null) {
+/**
+ * Starts a new quiz
+ * @param {Array|null} customPool - Optional array of kana to quiz (for retrying mistakes)
+ */
+function startQuiz(customPool) {
     if (customPool) {
-        quizPool = shuffle([...customPool]);
+        // Use the provided pool (for retrying mistakes)
+        quizPool = shuffle(customPool);
     } else {
+        // Get all selected kana
         const selection = collectSelections();
+        
+        // Make sure at least one row is selected
         if (selection.length === 0) {
             showPopup("Please select at least one row (e.g., 'A', 'Ka') to start.", 'No Selection');
             return;
         }
+        
+        // Shuffle the selections
         quizPool = shuffle(selection);
     }
 
+    // Reset quiz state
     currentIndex = 0;
     score = 0;
     mistakes = [];
     
+    // Show the quiz view and first question
     switchView('quiz');
     showQuestion();
 }
 
+/**
+ * Displays the current question on the screen
+ */
 function showQuestion() {
+    // Get the current kana item
     const item = quizPool[currentIndex];
+    
+    // Display the kana character
     elements.questionChar.textContent = item.char;
+    
+    // Clear the input field and focus it
     elements.answerInput.value = '';
     elements.answerInput.focus();
+    
+    // Clear any previous feedback
     elements.feedback.textContent = '';
     elements.feedback.className = 'feedback';
     
-    // Update Progress Bar
-    const pct = ((currentIndex) / quizPool.length) * 100;
-    elements.progressBar.style.width = `${pct}%`;
-    elements.counterText.textContent = `${currentIndex + 1} / ${quizPool.length}`;
+    // Calculate and display progress
+    const progressPercent = (currentIndex / quizPool.length) * 100;
+    elements.progressBar.style.width = progressPercent + '%';
+    
+    // Update counter text (e.g., "1 / 10")
+    const questionNumber = currentIndex + 1;
+    elements.counterText.textContent = questionNumber + ' / ' + quizPool.length;
 }
 
+/**
+ * Checks if the user's answer is correct
+ */
 function checkAnswer() {
-    const input = elements.answerInput.value.trim().toLowerCase();
-    if (!input) return; // Prevent empty submission
+    // Get what the user typed and make it lowercase
+    const userInput = elements.answerInput.value.trim().toLowerCase();
+    
+    // Don't allow empty answers
+    if (userInput === '') {
+        return;
+    }
 
+    // Get the current kana item
     const currentItem = quizPool[currentIndex];
-    // Check if input matches ANY of the valid romaji (e.g., 'shi' or 'si')
-    const isCorrect = currentItem.romaji.includes(input);
+    
+    // Check if the user's answer matches any valid romaji
+    let isCorrect = false;
+    for (let i = 0; i < currentItem.romaji.length; i++) {
+        if (currentItem.romaji[i] === userInput) {
+            isCorrect = true;
+            break;
+        }
+    }
 
     if (isCorrect) {
+        // Answer is correct!
         score++;
         elements.feedback.textContent = "Correct!";
         elements.feedback.classList.add('correct');
     } else {
-        elements.feedback.textContent = `Incorrect. Answer: ${currentItem.romaji[0]}`;
+        // Answer is wrong
+        const correctAnswer = currentItem.romaji[0];
+        elements.feedback.textContent = "Incorrect. Answer: " + correctAnswer;
         elements.feedback.classList.add('incorrect');
         mistakes.push(currentItem);
     }
 
-    // Temporary disable to prevent double-enter
+    // Disable input to prevent double-submission
     elements.answerInput.disabled = true;
-
-    // Short delay to read feedback
-    setTimeout(() => {
+    
+    // Wait 1 second, then move to next question
+    setTimeout(function() {
         elements.answerInput.disabled = false;
         currentIndex++;
+        
         if (currentIndex < quizPool.length) {
+            // More questions left
             showQuestion();
         } else {
+            // Quiz is finished
             finishQuiz();
         }
     }, 1000);
 }
 
+/**
+ * Shows the results screen after quiz is complete
+ */
 function finishQuiz() {
+    // Set progress bar to 100%
     elements.progressBar.style.width = '100%';
     
+    // Calculate accuracy percentage
     const accuracy = Math.round((score / quizPool.length) * 100);
-    elements.finalScore.textContent = `${accuracy}%`;
+    elements.finalScore.textContent = accuracy + '%';
+    
+    // Update statistics
     elements.totalCount.textContent = quizPool.length;
     elements.mistakeCount.textContent = mistakes.length;
 
-    // Populate Mistakes List
+    // Show mistakes list if there are any
     if (mistakes.length > 0) {
+        // Show the mistakes container
         elements.mistakesContainer.classList.remove('hidden');
         elements.retryBtn.classList.remove('hidden');
-        elements.mistakesUl.innerHTML = mistakes.map(m => 
-            `<li>
-                <strong style="font-size:1.2rem">${m.char}</strong> 
-                <span>${m.romaji.join(' / ')}</span>
-            </li>`
-        ).join('');
+        
+        // Create HTML for each mistake
+        let mistakesHTML = '';
+        for (let i = 0; i < mistakes.length; i++) {
+            const mistake = mistakes[i];
+            const romajiText = mistake.romaji.join(' / ');
+            mistakesHTML += '<li><strong style="font-size:1.2rem">' + mistake.char + '</strong> ' +
+                           '<span>' + romajiText + '</span></li>';
+        }
+        
+        elements.mistakesUl.innerHTML = mistakesHTML;
     } else {
+        // No mistakes, so hide the mistakes section
         elements.mistakesContainer.classList.add('hidden');
         elements.retryBtn.classList.add('hidden');
     }
 
+    // Switch to results view
     switchView('results');
 }
 
-// --- View Switching ---
+// --- View Switching Functions ---
+
+/**
+ * Switches which view is currently shown (selection, quiz, or results)
+ * @param {string} viewName - Name of the view to show
+ */
 function switchView(viewName) {
-    Object.values(views).forEach(el => el.classList.add('hidden'));
+    // Hide all views first
+    const viewNames = Object.keys(views);
+    for (let i = 0; i < viewNames.length; i++) {
+        const key = viewNames[i];
+        views[key].classList.add('hidden');
+    }
+    
+    // Show the requested view
     views[viewName].classList.remove('hidden');
+    
+    // Scroll to top of page
     window.scrollTo(0, 0);
 }
 
-// --- Persistence & Settings ---
+// --- Settings & Storage Functions ---
 
+/**
+ * Toggles dark mode on and off
+ */
 function toggleDarkMode() {
+    // Toggle the dark-mode class on the body
     document.body.classList.toggle('dark-mode');
+    
+    // Check if dark mode is now active
     const isDark = document.body.classList.contains('dark-mode');
+    
+    // Save preference to localStorage
     localStorage.setItem('kana-dark-mode', isDark);
+    
+    // Update the theme icons
     updateThemeIcons(isDark);
 }
 
+/**
+ * Updates which theme icon is visible (sun or moon)
+ * @param {boolean} isDark - True if dark mode is on
+ */
 function updateThemeIcons(isDark) {
     if (isDark) {
+        // Dark mode is on, show sun icon (to switch to light)
         elements.moonIcon.classList.add('hidden');
         elements.sunIcon.classList.remove('hidden');
     } else {
+        // Dark mode is off, show moon icon (to switch to dark)
         elements.moonIcon.classList.remove('hidden');
         elements.sunIcon.classList.add('hidden');
     }
 }
 
+/**
+ * Saves which checkboxes are currently selected to localStorage
+ */
 function saveSelections() {
+    // Get all checkboxes
     const checkboxes = document.querySelectorAll('input[type="checkbox"]');
     const state = {};
-    checkboxes.forEach(cb => {
+    
+    // Loop through each checkbox and save its state
+    for (let i = 0; i < checkboxes.length; i++) {
+        const cb = checkboxes[i];
+        const script = cb.dataset.script;
+        const group = cb.dataset.group;
+        
         // Create a unique key like "hiragana-ka"
-        const key = `${cb.dataset.script}-${cb.dataset.group}`;
+        const key = script + '-' + group;
         state[key] = cb.checked;
-    });
+    }
+    
+    // Save to localStorage as JSON string
     localStorage.setItem('kana-selections', JSON.stringify(state));
 }
 
+/**
+ * Loads saved settings from localStorage when page loads
+ */
 function loadSettings() {
-    // Theme
-    const isDark = localStorage.getItem('kana-dark-mode') === 'true';
-    if (isDark) document.body.classList.add('dark-mode');
+    // Load dark mode preference
+    const darkModeValue = localStorage.getItem('kana-dark-mode');
+    const isDark = darkModeValue === 'true';
+    
+    if (isDark) {
+        document.body.classList.add('dark-mode');
+    }
+    
     updateThemeIcons(isDark);
 
-    // Selections
-    const saved = JSON.parse(localStorage.getItem('kana-selections'));
-    if (saved) {
-        document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-            const key = `${cb.dataset.script}-${cb.dataset.group}`;
+    // Load saved checkbox selections
+    const savedJSON = localStorage.getItem('kana-selections');
+    if (savedJSON) {
+        const saved = JSON.parse(savedJSON);
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        
+        // Restore each checkbox state
+        for (let i = 0; i < checkboxes.length; i++) {
+            const cb = checkboxes[i];
+            const script = cb.dataset.script;
+            const group = cb.dataset.group;
+            const key = script + '-' + group;
+            
             if (saved[key]) {
                 cb.checked = true;
                 cb.parentElement.classList.add('checked');
             }
-        });
+        }
     }
 }
 
+/**
+ * Checks if tutorial modal should be shown on first visit
+ */
 function checkTutorial() {
     const seen = localStorage.getItem('kana-tutorial-seen');
     if (!seen) {
@@ -322,195 +549,308 @@ function checkTutorial() {
     }
 }
 
-// --- Bot Helper System ---
+// --- Bot Helper Functions ---
 
+/**
+ * Checks if bot helper should be shown on first visit
+ */
 function checkBotHelper() {
     const seen = localStorage.getItem('kana-bot-helper-seen');
     if (!seen) {
-        setTimeout(() => {
+        // Wait 1 second, then show the bot
+        setTimeout(function() {
             showBotHelper();
-        }, 1000); // Show after 1 second
+        }, 1000);
     }
 }
 
+/**
+ * Shows the bot helper and starts at step 0
+ */
 function showBotHelper() {
     elements.botHelper.classList.remove('hidden');
     botStep = 0;
     updateBotStep();
 }
 
+/**
+ * Hides the bot helper and marks it as seen
+ */
 function hideBotHelper() {
     elements.botHelper.classList.add('hidden');
     hideHighlight();
     localStorage.setItem('kana-bot-helper-seen', 'true');
 }
 
+/**
+ * Restarts the bot helper tutorial
+ */
 function restartBotHelper() {
-    // Clear the seen flag
+    // Clear the "seen" flag so it shows again
     localStorage.removeItem('kana-bot-helper-seen');
+    
     // Hide any current bot helper
     elements.botHelper.classList.add('hidden');
     hideHighlight();
-    // Reset and show the bot helper
-    setTimeout(() => {
+    
+    // Wait a bit, then show it again
+    setTimeout(function() {
         showBotHelper();
     }, 200);
 }
 
+/**
+ * Updates the bot helper to show the current step
+ */
 function updateBotStep() {
+    // Check if we're past the last step
     if (botStep < 0 || botStep >= botSteps.length) {
         hideBotHelper();
         return;
     }
 
+    // Get the current step data
     const step = botSteps[botStep];
+    
+    // Update the message text
     elements.botText.textContent = step.message;
     
-    // Update button visibility
-    elements.botPrev.style.display = botStep === 0 ? 'none' : 'inline-block';
-    elements.botNext.textContent = botStep === botSteps.length - 1 ? 'Got it!' : 'Next →';
+    // Update button visibility and text
+    if (botStep === 0) {
+        // First step - hide previous button
+        elements.botPrev.style.display = 'none';
+    } else {
+        // Show previous button
+        elements.botPrev.style.display = 'inline-block';
+    }
     
-    // Highlight element
+    if (botStep === botSteps.length - 1) {
+        // Last step - change next button text
+        elements.botNext.textContent = 'Got it!';
+    } else {
+        // Normal step
+        elements.botNext.textContent = 'Next →';
+    }
+    
+    // Highlight element if needed
     if (step.highlight) {
         if (step.multiple) {
+            // Highlight multiple elements
             highlightMultipleElements(step.highlight);
         } else {
+            // Highlight single element
             highlightElement(step.highlight);
         }
     } else {
+        // No highlight needed
         hideHighlight();
     }
 }
 
+/**
+ * Highlights a single element on the page
+ * @param {string} selector - CSS selector to find the element
+ */
 function highlightElement(selector) {
+    // Find the element
     const element = document.querySelector(selector);
+    
     if (!element) {
+        // Element not found, hide highlight
         hideHighlight();
         return;
     }
 
-    // First hide any existing highlight
+    // Hide any existing highlight first
     hideHighlight();
 
-    // Scroll element into view first
+    // Scroll the element into view
     element.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
     
-    // Wait for scroll and DOM update before highlighting
-    setTimeout(() => {
-        // Get fresh bounding rect after scroll
+    // Wait for scroll to complete, then highlight
+    setTimeout(function() {
+        // Get the element's position and size
         const rect = element.getBoundingClientRect();
         const highlight = elements.botHighlight;
+        const padding = 8;
         
-        // Position fixed uses viewport coordinates (getBoundingClientRect already accounts for this)
-        // Add padding for better visual effect
-        highlight.style.left = `${Math.max(0, rect.left - 8)}px`;
-        highlight.style.top = `${Math.max(0, rect.top - 8)}px`;
-        highlight.style.width = `${rect.width + 16}px`;
-        highlight.style.height = `${rect.height + 16}px`;
+        // Position the highlight around the element
+        const left = Math.max(0, rect.left - padding);
+        const top = Math.max(0, rect.top - padding);
+        const width = rect.width + (padding * 2);
+        const height = rect.height + (padding * 2);
+        
+        highlight.style.left = left + 'px';
+        highlight.style.top = top + 'px';
+        highlight.style.width = width + 'px';
+        highlight.style.height = height + 'px';
         highlight.classList.add('active');
-    }, 400); // Wait for scroll animation to complete
+    }, 400);
 }
 
+/**
+ * Highlights multiple elements by creating a box around all of them
+ * @param {string} selector - CSS selector to find all elements
+ */
 function highlightMultipleElements(selector) {
+    // Find all matching elements
     const elements_list = document.querySelectorAll(selector);
+    
     if (!elements_list || elements_list.length === 0) {
+        // No elements found
         hideHighlight();
         return;
     }
 
-    // First hide any existing highlight
+    // Hide any existing highlight first
     hideHighlight();
 
     // Scroll first element into view
     elements_list[0].scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
     
-    // Wait for scroll and DOM update before highlighting
-    setTimeout(() => {
-        // Calculate bounding box that encompasses all elements
+    // Wait for scroll, then calculate bounding box
+    setTimeout(function() {
+        // Start with extreme values
         let minLeft = Infinity;
         let minTop = Infinity;
         let maxRight = -Infinity;
         let maxBottom = -Infinity;
 
-        elements_list.forEach(element => {
+        // Loop through all elements and find the boundaries
+        for (let i = 0; i < elements_list.length; i++) {
+            const element = elements_list[i];
             const rect = element.getBoundingClientRect();
-            minLeft = Math.min(minLeft, rect.left);
-            minTop = Math.min(minTop, rect.top);
-            maxRight = Math.max(maxRight, rect.right);
-            maxBottom = Math.max(maxBottom, rect.bottom);
-        });
+            
+            // Update boundaries
+            if (rect.left < minLeft) {
+                minLeft = rect.left;
+            }
+            if (rect.top < minTop) {
+                minTop = rect.top;
+            }
+            if (rect.right > maxRight) {
+                maxRight = rect.right;
+            }
+            if (rect.bottom > maxBottom) {
+                maxBottom = rect.bottom;
+            }
+        }
 
+        // Create highlight box around all elements
         const highlight = elements.botHighlight;
         const padding = 8;
         
-        // Position fixed uses viewport coordinates
-        highlight.style.left = `${Math.max(0, minLeft - padding)}px`;
-        highlight.style.top = `${Math.max(0, minTop - padding)}px`;
-        highlight.style.width = `${maxRight - minLeft + (padding * 2)}px`;
-        highlight.style.height = `${maxBottom - minTop + (padding * 2)}px`;
+        const left = Math.max(0, minLeft - padding);
+        const top = Math.max(0, minTop - padding);
+        const width = (maxRight - minLeft) + (padding * 2);
+        const height = (maxBottom - minTop) + (padding * 2);
+        
+        highlight.style.left = left + 'px';
+        highlight.style.top = top + 'px';
+        highlight.style.width = width + 'px';
+        highlight.style.height = height + 'px';
         highlight.classList.add('active');
-    }, 400); // Wait for scroll animation to complete
+    }, 400);
 }
 
+/**
+ * Hides the highlight overlay
+ */
 function hideHighlight() {
     elements.botHighlight.classList.remove('active');
 }
 
+/**
+ * Moves to the next step in the bot tutorial
+ */
 function nextBotStep() {
     if (botStep < botSteps.length - 1) {
+        // Go to next step
         botStep++;
         updateBotStep();
     } else {
+        // Last step - close the bot
         hideBotHelper();
     }
 }
 
+/**
+ * Moves to the previous step in the bot tutorial
+ */
 function prevBotStep() {
     if (botStep > 0) {
+        // Go to previous step
         botStep--;
         updateBotStep();
     }
 }
 
-// --- Popup System ---
+// --- Popup System Functions ---
 
-function showPopup(message, title = 'Notice') {
+/**
+ * Shows a popup message to the user
+ * @param {string} message - The message to display
+ * @param {string} title - The title of the popup (defaults to "Notice")
+ */
+function showPopup(message, title) {
+    // Use default title if none provided
+    if (title === undefined) {
+        title = 'Notice';
+    }
+    
     elements.popupTitle.textContent = title;
     elements.popupMessage.textContent = message;
     elements.popupModal.classList.remove('hidden');
 }
 
+/**
+ * Hides the popup
+ */
 function hidePopup() {
     elements.popupModal.classList.add('hidden');
 }
 
-// --- Event Listeners ---
+// --- Event Listeners Setup ---
 
+/**
+ * Sets up all event listeners when page loads
+ */
 function setupEventListeners() {
-    elements.startBtn.addEventListener('click', () => {
+    // Start Quiz button
+    elements.startBtn.addEventListener('click', function() {
         isRetry = false;
         startQuiz();
     });
 
+    // Submit Answer button
     elements.submitBtn.addEventListener('click', checkAnswer);
     
-    // Allow "Enter" key to submit
-    elements.answerInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') checkAnswer();
+    // Allow Enter key to submit answer
+    elements.answerInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            checkAnswer();
+        }
     });
 
-    elements.homeBtn.addEventListener('click', () => switchView('selection'));
+    // Back to Home button
+    elements.homeBtn.addEventListener('click', function() {
+        switchView('selection');
+    });
     
-    elements.retryBtn.addEventListener('click', () => {
+    // Retry Mistakes button
+    elements.retryBtn.addEventListener('click', function() {
         isRetry = true;
         startQuiz(mistakes);
     });
 
+    // Theme toggle button
     elements.themeToggle.addEventListener('click', toggleDarkMode);
     
+    // Restart Tutorial button
     elements.restartTutorial.addEventListener('click', restartBotHelper);
     
-    elements.closeTutorialBtn.addEventListener('click', () => {
+    // Close Tutorial Modal button
+    elements.closeTutorialBtn.addEventListener('click', function() {
         elements.tutorialModal.classList.add('hidden');
         localStorage.setItem('kana-tutorial-seen', 'true');
     });
@@ -518,43 +858,76 @@ function setupEventListeners() {
     // Popup close button
     elements.popupClose.addEventListener('click', hidePopup);
     
-    // Close popup when clicking outside
-    elements.popupModal.addEventListener('click', (e) => {
+    // Close popup when clicking outside of it
+    elements.popupModal.addEventListener('click', function(e) {
         if (e.target === elements.popupModal) {
             hidePopup();
         }
     });
     
-    // Close popup or bot helper with Escape key
-    document.addEventListener('keydown', (e) => {
+    // Close popup or bot helper when Escape key is pressed
+    document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
-            if (!elements.popupModal.classList.contains('hidden')) {
+            // Check if popup is visible
+            const popupHidden = elements.popupModal.classList.contains('hidden');
+            if (!popupHidden) {
                 hidePopup();
-            } else if (!elements.botHelper.classList.contains('hidden')) {
-                hideBotHelper();
+            } else {
+                // Check if bot helper is visible
+                const botHidden = elements.botHelper.classList.contains('hidden');
+                if (!botHidden) {
+                    hideBotHelper();
+                }
             }
         }
     });
 
-    // Bot Helper Event Listeners
+    // Bot Helper navigation buttons
     elements.botNext.addEventListener('click', nextBotStep);
     elements.botPrev.addEventListener('click', prevBotStep);
     elements.botSkip.addEventListener('click', hideBotHelper);
     elements.botClose.addEventListener('click', hideBotHelper);
 
-    // Bulk Select Helpers
-    const setGroupState = (script, state) => {
-        const cbs = document.querySelectorAll(`input[data-script="${script}"]`);
-        cbs.forEach(cb => {
+    // Helper function to set all checkboxes for a script type
+    function setGroupState(script, state) {
+        // Find all checkboxes for this script type
+        const selector = 'input[data-script="' + script + '"]';
+        const checkboxes = document.querySelectorAll(selector);
+        
+        // Loop through each checkbox
+        for (let i = 0; i < checkboxes.length; i++) {
+            const cb = checkboxes[i];
             cb.checked = state;
-            if(state) cb.parentElement.classList.add('checked');
-            else cb.parentElement.classList.remove('checked');
-        });
+            
+            // Update visual styling
+            if (state) {
+                cb.parentElement.classList.add('checked');
+            } else {
+                cb.parentElement.classList.remove('checked');
+            }
+        }
+        
+        // Save the changes
         saveSelections();
-    };
+    }
 
-    document.getElementById('select-all-h').addEventListener('click', () => setGroupState('hiragana', true));
-    document.getElementById('clear-all-h').addEventListener('click', () => setGroupState('hiragana', false));
-    document.getElementById('select-all-k').addEventListener('click', () => setGroupState('katakana', true));
-    document.getElementById('clear-all-k').addEventListener('click', () => setGroupState('katakana', false));
+    // Select All Hiragana button
+    document.getElementById('select-all-h').addEventListener('click', function() {
+        setGroupState('hiragana', true);
+    });
+    
+    // Clear All Hiragana button
+    document.getElementById('clear-all-h').addEventListener('click', function() {
+        setGroupState('hiragana', false);
+    });
+    
+    // Select All Katakana button
+    document.getElementById('select-all-k').addEventListener('click', function() {
+        setGroupState('katakana', true);
+    });
+    
+    // Clear All Katakana button
+    document.getElementById('clear-all-k').addEventListener('click', function() {
+        setGroupState('katakana', false);
+    });
 }

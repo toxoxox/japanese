@@ -1,4 +1,3 @@
-
 const KANA_DATA = {
     hiragana: {
         a: [
