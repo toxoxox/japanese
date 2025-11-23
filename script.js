@@ -67,12 +67,12 @@ const botSteps = [
     },
     {
         message: "Use these buttons to quickly select all or clear selections for each script.",
-        highlight: '.group-actions',
-        multiple: true
+        highlight: '.script-group:first-child .group-actions',
+        multiple: false
     },
     {
         message: "Once you've selected at least one row, click here to start your quiz!",
-        highlight: '.action-area'
+        highlight: '#start-btn'
     },
     {
         message: "You can toggle dark mode anytime using this button in the header.",
