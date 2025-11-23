@@ -86,7 +86,7 @@ function createCheckbox(key, scriptName, container, firstChar, romajiList) {
         } else {
             labelEl.classList.remove('checked');
         }   
-        saveSelections();
+        saveRowSelections();
     });
     
     container.appendChild(labelEl);
