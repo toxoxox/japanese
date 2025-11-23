@@ -85,7 +85,7 @@ function createCheckbox(key, scriptName, container, firstChar, romajiList) {
             labelEl.classList.add('checked');
         } else {
             labelEl.classList.remove('checked');
-        }
+        }   
         saveSelections();
     });
     
@@ -699,7 +699,6 @@ function setupEventListeners() {
         }
     });
 
-    elements.botClose.addEventListener('click', hideBotHelper);
 }
 
 function setupRowSelectionListeners() {
