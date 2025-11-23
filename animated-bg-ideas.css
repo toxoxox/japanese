@@ -1,0 +1,305 @@
+/* ============================================
+   ANIMATED BACKGROUND IDEAS
+   Choose one and add to your style.css
+   ============================================ */
+
+/* ============================================
+   OPTION 1: Animated Gradient Background
+   Smooth color transitions
+   ============================================ */
+body {
+    background: linear-gradient(-45deg, #e9f6fb, #ffffff, #f0f9ff, #e0f2fe);
+    background-size: 400% 400%;
+    animation: gradientShift 15s ease infinite;
+}
+
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+body.dark-mode {
+    background: linear-gradient(-45deg, #111827, #1f2937, #0f172a, #1e293b);
+    background-size: 400% 400%;
+    animation: gradientShift 15s ease infinite;
+}
+
+/* ============================================
+   OPTION 2: Floating Kana Characters
+   Subtle Japanese characters floating in background
+   ============================================ */
+body::before {
+    content: 'あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    font-size: 2rem;
+    color: rgba(99, 194, 214, 0.05);
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+    animation: floatKana 20s linear infinite;
+}
+
+@keyframes floatKana {
+    0% {
+        transform: translateY(0) translateX(0);
+    }
+    25% {
+        transform: translateY(-20px) translateX(10px);
+    }
+    50% {
+        transform: translateY(-40px) translateX(0);
+    }
+    75% {
+        transform: translateY(-20px) translateX(-10px);
+    }
+    100% {
+        transform: translateY(0) translateX(0);
+    }
+}
+
+body.dark-mode::before {
+    color: rgba(99, 194, 214, 0.08);
+}
+
+/* ============================================
+   OPTION 3: Animated Wave Pattern
+   Ocean-like wave animation
+   ============================================ */
+body {
+    background: linear-gradient(180deg, #e9f6fb 0%, #ffffff 100%);
+    position: relative;
+    overflow-x: hidden;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 200%;
+    height: 200px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120'%3E%3Cpath d='M0,60 Q300,20 600,60 T1200,60 L1200,120 L0,120 Z' fill='rgba(99,194,214,0.1)'/%3E%3C/svg%3E") repeat-x;
+    animation: wave 10s linear infinite;
+    z-index: 0;
+}
+
+body::after {
+    content: '';
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 200%;
+    height: 200px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120'%3E%3Cpath d='M0,80 Q300,40 600,80 T1200,80 L1200,120 L0,120 Z' fill='rgba(99,194,214,0.05)'/%3E%3C/svg%3E") repeat-x;
+    animation: wave 15s linear infinite reverse;
+    z-index: 0;
+}
+
+@keyframes wave {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+/* ============================================
+   OPTION 4: Floating Geometric Shapes
+   Animated circles and shapes
+   ============================================ */
+body {
+    position: relative;
+    overflow-x: hidden;
+}
+
+body::before,
+body::after {
+    content: '';
+    position: fixed;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(99, 194, 214, 0.1) 0%, transparent 70%);
+    z-index: 0;
+    pointer-events: none;
+}
+
+body::before {
+    width: 300px;
+    height: 300px;
+    top: 10%;
+    left: 10%;
+    animation: floatShape1 20s ease-in-out infinite;
+}
+
+body::after {
+    width: 200px;
+    height: 200px;
+    bottom: 20%;
+    right: 15%;
+    animation: floatShape2 25s ease-in-out infinite;
+}
+
+@keyframes floatShape1 {
+    0%, 100% {
+        transform: translate(0, 0) scale(1);
+    }
+    33% {
+        transform: translate(50px, -30px) scale(1.1);
+    }
+    66% {
+        transform: translate(-30px, 50px) scale(0.9);
+    }
+}
+
+@keyframes floatShape2 {
+    0%, 100% {
+        transform: translate(0, 0) scale(1);
+    }
+    50% {
+        transform: translate(-40px, -60px) scale(1.2);
+    }
+}
+
+/* ============================================
+   OPTION 5: Particle Grid Animation
+   Subtle grid with animated particles
+   ============================================ */
+body {
+    background: 
+        linear-gradient(rgba(99, 194, 214, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(99, 194, 214, 0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+    position: relative;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        radial-gradient(circle at 20% 30%, rgba(99, 194, 214, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(99, 194, 214, 0.05) 0%, transparent 50%);
+    animation: particleMove 30s ease-in-out infinite;
+    z-index: 0;
+    pointer-events: none;
+}
+
+@keyframes particleMove {
+    0%, 100% {
+        transform: translate(0, 0);
+        opacity: 1;
+    }
+    25% {
+        transform: translate(30px, -20px);
+        opacity: 0.8;
+    }
+    50% {
+        transform: translate(-20px, 30px);
+        opacity: 0.9;
+    }
+    75% {
+        transform: translate(20px, 20px);
+        opacity: 0.7;
+    }
+}
+
+/* ============================================
+   OPTION 6: Subtle Pulse Effect
+   Gentle breathing/pulsing background
+   ============================================ */
+body {
+    background: radial-gradient(ellipse at center, #e9f6fb 0%, #ffffff 100%);
+    animation: pulseBg 8s ease-in-out infinite;
+}
+
+@keyframes pulseBg {
+    0%, 100% {
+        background: radial-gradient(ellipse at center, #e9f6fb 0%, #ffffff 100%);
+    }
+    50% {
+        background: radial-gradient(ellipse at 30% 40%, #e0f2fe 0%, #ffffff 100%);
+    }
+}
+
+body.dark-mode {
+    background: radial-gradient(ellipse at center, #111827 0%, #1f2937 100%);
+    animation: pulseBgDark 8s ease-in-out infinite;
+}
+
+@keyframes pulseBgDark {
+    0%, 100% {
+        background: radial-gradient(ellipse at center, #111827 0%, #1f2937 100%);
+    }
+    50% {
+        background: radial-gradient(ellipse at 30% 40%, #0f172a 0%, #1e293b 100%);
+    }
+}
+
+/* ============================================
+   OPTION 7: Animated Mesh Gradient
+   Modern mesh gradient effect
+   ============================================ */
+body {
+    background: 
+        radial-gradient(at 0% 0%, rgba(99, 194, 214, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(59, 130, 246, 0.1) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(99, 194, 214, 0.1) 0px, transparent 50%),
+        radial-gradient(at 0% 100%, rgba(59, 130, 246, 0.15) 0px, transparent 50%),
+        #ffffff;
+    background-size: 200% 200%;
+    animation: meshMove 20s ease infinite;
+}
+
+@keyframes meshMove {
+    0% {
+        background-position: 0% 0%;
+    }
+    25% {
+        background-position: 100% 0%;
+    }
+    50% {
+        background-position: 100% 100%;
+    }
+    75% {
+        background-position: 0% 100%;
+    }
+    100% {
+        background-position: 0% 0%;
+    }
+}
+
+body.dark-mode {
+    background: 
+        radial-gradient(at 0% 0%, rgba(99, 194, 214, 0.2) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(59, 130, 246, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(99, 194, 214, 0.15) 0px, transparent 50%),
+        radial-gradient(at 0% 100%, rgba(59, 130, 246, 0.2) 0px, transparent 50%),
+        #111827;
+    background-size: 200% 200%;
+    animation: meshMove 20s ease infinite;
+}
+
+/* ============================================
+   IMPORTANT: Make sure main content is above background
+   ============================================ */
+main.container,
+.card {
+    position: relative;
+    z-index: 1;
+}
+

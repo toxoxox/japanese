@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="icon" type="image/x-icon" href="images/favicon.png   ">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -28,38 +29,72 @@
 
     <main class="container">
         
-        <section id="view-selection" class="card fade-in">
+        <section id="view-script-selection" class="card fade-in">
             <div class="card-header">
-                <h2>Configure Your Quiz</h2>
-                <p>Select the rows you wish to practice.</p>
+                <h2>Step 1: Choose Script</h2>
+                <p>Select which script you want to learn.</p>
             </div>
             
-            <div class="grid-columns">
-                <div class="script-group">
-                    <div class="group-header">
+            <div class="script-selection-grid">
+                <button class="script-option" id="script-hiragana" data-script="hiragana">
+                    <div class="script-option-content">
                         <h3>Hiragana</h3>
-                        <div class="group-actions">
-                            <button class="text-btn" id="select-all-h">All</button>
-                            <button class="text-btn" id="clear-all-h">None</button>
-                        </div>
+                        <p>Japanese phonetic script</p>
                     </div>
-                    <div class="checkbox-grid" id="hiragana-options"></div>
-                </div>
-
-                <div class="script-group">
-                    <div class="group-header">
+                </button>
+                <button class="script-option" id="script-katakana" data-script="katakana">
+                    <div class="script-option-content">
                         <h3>Katakana</h3>
-                        <div class="group-actions">
-                            <button class="text-btn" id="select-all-k">All</button>
-                            <button class="text-btn" id="clear-all-k">None</button>
-                        </div>
+                        <p>Japanese phonetic script</p>
                     </div>
-                    <div class="checkbox-grid" id="katakana-options"></div>
+                </button>
+                <button class="script-option" id="script-both" data-script="both">
+                    <div class="script-option-content">
+                        <h3>Both</h3>
+                        <p>Hiragana and Katakana</p>
+                    </div>
+                </button>
+            </div>
+
+            <div class="action-area">
+                <button id="script-next-btn" class="btn-primary" disabled>Next</button>
+            </div>
+        </section>
+
+        <section id="view-row-selection" class="card fade-in hidden">
+            <div class="card-header">
+                <h2>Step 2: Select Rows</h2>
+                <p>Choose which kana rows you want to practice.</p>
+            </div>
+            
+            <div id="row-selection-container"></div>
+
+            <div class="action-area">
+                <button id="row-back-btn" class="btn-secondary">Back</button>
+                <button id="row-next-btn" class="btn-primary" disabled>Next</button>
+            </div>
+        </section>
+
+        <section id="view-overview" class="card fade-in hidden">
+            <div class="card-header">
+                <h2>Step 3: Review & Start</h2>
+                <p>Review your selections and start the quiz.</p>
+            </div>
+            
+            <div class="overview-content">
+                <div class="overview-section">
+                    <h3>Selected Script(s)</h3>
+                    <p id="overview-scripts"></p>
+                </div>
+                <div class="overview-section">
+                    <h3>Selected Rows</h3>
+                    <div id="overview-rows"></div>
                 </div>
             </div>
 
             <div class="action-area">
-                <button id="start-btn" class="btn-primary">Start Quiz</button>
+                <button id="overview-back-btn" class="btn-secondary">Back</button>
+                <button id="start-quiz-btn" class="btn-primary">Start Quiz</button>
             </div>
         </section>
 
@@ -80,6 +115,11 @@
                 </div>
                 
                 <div id="feedback-msg" class="feedback"></div>
+                
+                <div class="quiz-actions">
+                    <button id="skip-question" class="btn-secondary">Skip</button>
+                    <button id="quiz-home-btn" class="btn-secondary">Return Home</button>
+                </div>
             </div>
         </section>
 
@@ -119,9 +159,9 @@
     <div id="tutorial-modal" class="modal hidden">
         <div class="modal-content">
             <h3>Welcome to KanaMaster</h3>
-            <p>1. Select the <strong>rows</strong> (e.g., A, Ka, Sa) you want to study.</p>
-            <p>2. You can mix Hiragana and Katakana.</p>
-            <p>3. Press <strong>Start Quiz</strong> and type the Romanized reading (Romaji).</p>
+            <p>1. Choose which script you want to learn: Hiragana, Katakana, or both.</p>
+            <p>2. Select the kana rows you want to practice.</p>
+            <p>3. Review your selections and start the quiz!</p>
             <button id="close-tutorial" class="btn-primary">Got it!</button>
         </div>
     </div>
@@ -130,33 +170,12 @@
         <div class="modal-content">
             <h3 id="popup-title">Notice</h3>
             <p id="popup-message"></p>
-            <button id="popup-close" class="btn-primary">OK</button>
+            <div id="popup-buttons" class="popup-buttons">
+                <button id="popup-close" class="btn-primary">OK</button>
+            </div>
         </div>
     </div>
 
-    <!-- Bot Helper -->
-    <div class="bot-highlight"></div>
-    <div id="bot-helper" class="bot-helper hidden">
-        <div class="bot-avatar">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-            </svg>
-        </div>
-        <div class="bot-message">
-            <div class="bot-header">
-                <span class="bot-name">KanaBot</span>
-                <button id="bot-close" class="bot-close" aria-label="Close">×</button>
-            </div>
-            <div class="bot-content">
-                <p id="bot-text"></p>
-                <div class="bot-actions">
-                    <button id="bot-prev" class="btn-secondary bot-btn">← Previous</button>
-                    <button id="bot-next" class="btn-primary bot-btn">Next →</button>
-                    <button id="bot-skip" class="text-btn bot-skip">Skip Tour</button>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <script src="data.js"></script>
     <script src="script.js"></script>

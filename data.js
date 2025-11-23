@@ -66,7 +66,6 @@ const KANA_DATA = {
             { char: 'を', romaji: ['wo', 'o'] },
             { char: 'ん', romaji: ['n', 'nn'] }
         ],
-        // Dakuon
         ga: [
             { char: 'が', romaji: ['ga'] },
             { char: 'ぎ', romaji: ['gi'] },
@@ -95,7 +94,6 @@ const KANA_DATA = {
             { char: 'べ', romaji: ['be'] },
             { char: 'ぼ', romaji: ['bo'] }
         ],
-        // Handakuon
         pa: [
             { char: 'ぱ', romaji: ['pa'] },
             { char: 'ぴ', romaji: ['pi'] },
@@ -103,7 +101,6 @@ const KANA_DATA = {
             { char: 'ぺ', romaji: ['pe'] },
             { char: 'ぽ', romaji: ['po'] }
         ],
-        // Yōon
         kya: [
             { char: 'きゃ', romaji: ['kya'] },
             { char: 'きゅ', romaji: ['kyu'] },
@@ -227,7 +224,6 @@ const KANA_DATA = {
             { char: 'ヲ', romaji: ['wo', 'o'] },
             { char: 'ン', romaji: ['n', 'nn'] }
         ],
-        // Dakuon
         ga: [
             { char: 'ガ', romaji: ['ga'] },
             { char: 'ギ', romaji: ['gi'] },
@@ -256,7 +252,6 @@ const KANA_DATA = {
             { char: 'ベ', romaji: ['be'] },
             { char: 'ボ', romaji: ['bo'] }
         ],
-        // Handakuon
         pa: [
             { char: 'パ', romaji: ['pa'] },
             { char: 'ピ', romaji: ['pi'] },
@@ -264,7 +259,6 @@ const KANA_DATA = {
             { char: 'ペ', romaji: ['pe'] },
             { char: 'ポ', romaji: ['po'] }
         ],
-        // Yōon
         kya: [
             { char: 'キャ', romaji: ['kya'] },
             { char: 'キュ', romaji: ['kyu'] },
